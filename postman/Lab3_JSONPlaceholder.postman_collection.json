@@ -159,6 +159,79 @@
             "description": "Validates posts response using JSON Schema and checks field types."
           },
           "response": []
+        },
+        {
+          "name": "POST /posts - data driven create post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
+                  "const responseJson = pm.response.json();",
+                  "",
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response time is less than max_response_time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);",
+                  "});",
+                  "",
+                  "pm.test('Response contains created post id', function () {",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson.id).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test('Created post title matches test data', function () {",
+                  "    pm.expect(responseJson.title).to.eql(pm.iterationData.get('title'));",
+                  "});",
+                  "",
+                  "pm.test('Created post body matches test data', function () {",
+                  "    pm.expect(responseJson.body).to.eql(pm.iterationData.get('body'));",
+                  "});",
+                  "",
+                  "pm.test('Created post userId matches test data', function () {",
+                  "    pm.expect(Number(responseJson.userId)).to.eql(Number(pm.iterationData.get('userId')));",
+                  "});",
+                  "",
+                  "pm.environment.set('created_post_id', responseJson.id);",
+                  "",
+                  "console.log('POST status:', pm.response.code);",
+                  "console.log('POST response time:', pm.response.responseTime);",
+                  "console.log('Created post id:', responseJson.id);",
+                  "console.log('Created title:', responseJson.title);",
+                  "console.log('Created userId:', responseJson.userId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"{{title}}\",\n  \"body\": \"{{body}}\",\n  \"userId\": {{userId}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/posts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "posts"
+              ]
+            },
+            "description": "Creates posts using external data file. The request body uses title, body and userId from JSON or CSV data file."
+          },
+          "response": []
         }
       ]
     },
