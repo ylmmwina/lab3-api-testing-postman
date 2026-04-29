@@ -1,0 +1,25 @@
+{
+  "name": "lab3-api-testing-postman",
+  "version": "1.0.0",
+  "description": "Laboratory work 3: Complex REST API testing with Postman and Newman",
+  "scripts": {
+    "test": "newman run postman/Lab3_JSONPlaceholder.postman_collection.json -e postman/Lab3_JSONPlaceholder.postman_environment.json",
+    "test:data:json": "newman run postman/Lab3_JSONPlaceholder.postman_collection.json -e postman/Lab3_JSONPlaceholder.postman_environment.json -d data/posts_data.json",
+    "test:data:csv": "newman run postman/Lab3_JSONPlaceholder.postman_collection.json -e postman/Lab3_JSONPlaceholder.postman_environment.json -d data/posts_data.csv",
+    "report": "newman run postman/Lab3_JSONPlaceholder.postman_collection.json -e postman/Lab3_JSONPlaceholder.postman_environment.json -d data/posts_data.json -r cli,htmlextra,json --reporter-htmlextra-export reports/newman-report.html --reporter-json-export reports/newman-report.json",
+    "stability": "bash scripts/run_newman.sh 5"
+  },
+  "keywords": [
+    "postman",
+    "newman",
+    "api-testing",
+    "jsonplaceholder",
+    "rest-api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "newman": "^6.2.1",
+    "newman-reporter-htmlextra": "^1.23.1"
+  }
+}
