@@ -330,7 +330,212 @@
     },
     {
       "name": "Negative tests",
-      "item": []
+      "item": [
+        {
+          "name": "NEG 01 - GET non-existing post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
+                  "let responseBody = {};",
+                  "try { responseBody = pm.response.json(); } catch (e) { responseBody = {}; }",
+                  "pm.test('Status code indicates non-existing resource behavior', function () {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is less than max_response_time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);",
+                  "});",
+                  "pm.test('Response body is empty object when resource does not exist', function () {",
+                  "    pm.expect(responseBody).to.be.an('object');",
+                  "    pm.expect(Object.keys(responseBody).length).to.eql(0);",
+                  "});",
+                  "console.log('NEG GET non-existing status:', pm.response.code);",
+                  "console.log('NEG GET non-existing response time:', pm.response.responseTime);",
+                  "console.log('NEG GET non-existing body:', responseBody);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/posts/999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "posts",
+                "999999"
+              ]
+            },
+            "description": "Negative test for reading a non-existing post. JSONPlaceholder may return an empty object and may not behave like a strict production API."
+          },
+          "response": []
+        },
+        {
+          "name": "NEG 02 - POST /posts with invalid data",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
+                  "const responseJson = pm.response.json();",
+                  "pm.test('JSONPlaceholder accepts invalid data with 201 status', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Response time is less than max_response_time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);",
+                  "});",
+                  "pm.test('Response contains id even for invalid data', function () {",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson.id).to.be.a('number');",
+                  "});",
+                  "pm.test('Actual response keeps invalid field types', function () {",
+                  "    pm.expect(responseJson.title).to.be.a('number');",
+                  "    pm.expect(responseJson.body).to.be.a('boolean');",
+                  "    pm.expect(responseJson.userId).to.be.a('string');",
+                  "});",
+                  "console.log('NEG POST invalid data status:', pm.response.code);",
+                  "console.log('NEG POST invalid data response time:', pm.response.responseTime);",
+                  "console.log('NEG POST invalid data response:', responseJson);",
+                  "console.log('Observation: API does not validate incorrect data types.');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": 12345,\n  \"body\": true,\n  \"userId\": \"invalid-user\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/posts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "posts"
+              ]
+            },
+            "description": "Negative test with incorrect data types. JSONPlaceholder accepts the payload, so the test documents absence of server-side validation."
+          },
+          "response": []
+        },
+        {
+          "name": "NEG 03 - PUT /posts with wrong ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
+                  "let responseBody = {};",
+                  "try { responseBody = pm.response.json(); } catch (e) { responseBody = {}; }",
+                  "pm.test('Status code indicates wrong ID behavior', function () {",
+                  "    pm.expect([200, 404, 500]).to.include(pm.response.code);",
+                  "});",
+                  "pm.test('Response time is less than max_response_time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);",
+                  "});",
+                  "pm.test('Response is available for analysis', function () {",
+                  "    pm.expect(responseBody).to.be.an('object');",
+                  "});",
+                  "console.log('NEG PUT wrong ID status:', pm.response.code);",
+                  "console.log('NEG PUT wrong ID response time:', pm.response.responseTime);",
+                  "console.log('NEG PUT wrong ID body:', responseBody);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 999999,\n  \"title\": \"Wrong ID title\",\n  \"body\": \"Wrong ID body\",\n  \"userId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/posts/999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "posts",
+                "999999"
+              ]
+            },
+            "description": "Negative test for PUT with wrong/non-existing ID. Allowed statuses are documented because JSONPlaceholder is a fake API and may not return strict production-style validation errors."
+          },
+          "response": []
+        },
+        {
+          "name": "NEG 04 - DELETE non-existing post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
+                  "let responseBody = {};",
+                  "try { responseBody = pm.response.json(); } catch (e) { responseBody = {}; }",
+                  "pm.test('Status code is 200 for fake DELETE operation', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response time is less than max_response_time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);",
+                  "});",
+                  "pm.test('Response body is empty object after DELETE', function () {",
+                  "    pm.expect(responseBody).to.be.an('object');",
+                  "    pm.expect(Object.keys(responseBody).length).to.eql(0);",
+                  "});",
+                  "console.log('NEG DELETE non-existing status:', pm.response.code);",
+                  "console.log('NEG DELETE non-existing response time:', pm.response.responseTime);",
+                  "console.log('NEG DELETE non-existing body:', responseBody);",
+                  "console.log('Observation: JSONPlaceholder fakes DELETE and does not really delete data.');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/posts/999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "posts",
+                "999999"
+              ]
+            },
+            "description": "Negative test for deleting a non-existing post. JSONPlaceholder fakes DELETE requests and commonly returns 200 with an empty object."
+          },
+          "response": []
+        }
+      ]
     },
     {
       "name": "Workflow",
