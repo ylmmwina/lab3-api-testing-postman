@@ -232,6 +232,99 @@
             "description": "Creates posts using external data file. The request body uses title, body and userId from JSON or CSV data file."
           },
           "response": []
+        },
+        {
+          "name": "POST /posts - create post with random data",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const randomNumber = Math.floor(Math.random() * 100000);",
+                  "const randomTitle = `Generated title ${randomNumber}`;",
+                  "const randomBody = `Generated body text ${randomNumber}`;",
+                  "",
+                  "pm.environment.set('random_title', randomTitle);",
+                  "pm.environment.set('random_body', randomBody);",
+                  "",
+                  "console.log('Generated random title:', randomTitle);",
+                  "console.log('Generated random body:', randomBody);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
+                  "const responseJson = pm.response.json();",
+                  "const expectedTitle = pm.environment.get('random_title');",
+                  "const expectedBody = pm.environment.get('random_body');",
+                  "const expectedUserId = Number(pm.environment.get('user_id'));",
+                  "",
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response time is less than max_response_time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);",
+                  "});",
+                  "",
+                  "pm.test('Response contains generated title', function () {",
+                  "    pm.expect(responseJson.title).to.eql(expectedTitle);",
+                  "});",
+                  "",
+                  "pm.test('Response contains generated body', function () {",
+                  "    pm.expect(responseJson.body).to.eql(expectedBody);",
+                  "});",
+                  "",
+                  "pm.test('Response contains expected userId', function () {",
+                  "    pm.expect(Number(responseJson.userId)).to.eql(expectedUserId);",
+                  "});",
+                  "",
+                  "pm.test('Response contains generated id', function () {",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson.id).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.environment.set('created_post_id', responseJson.id);",
+                  "",
+                  "console.log('Random POST status:', pm.response.code);",
+                  "console.log('Random POST response time:', pm.response.responseTime);",
+                  "console.log('Random POST id:', responseJson.id);",
+                  "console.log('Random POST title:', responseJson.title);",
+                  "console.log('Random POST body:', responseJson.body);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"{{random_title}}\",\n  \"body\": \"{{random_body}}\",\n  \"userId\": {{user_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/posts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "posts"
+              ]
+            },
+            "description": "Generates random title and body in Pre-request Script, sends them in POST request and validates response."
+          },
+          "response": []
         }
       ]
     },
