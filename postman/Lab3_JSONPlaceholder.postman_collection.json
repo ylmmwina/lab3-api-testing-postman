@@ -84,6 +84,81 @@
             "description": "Gets all posts and verifies status code, content type, response time, array type, minimum number of elements and object structure."
           },
           "response": []
+        },
+        {
+          "name": "GET /posts - JSON Schema validation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time is less than max_response_time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);",
+                  "});",
+                  "",
+                  "const postSchema = {",
+                  "    type: 'object',",
+                  "    required: ['userId', 'id', 'title', 'body'],",
+                  "    properties: {",
+                  "        userId: { type: 'number' },",
+                  "        id: { type: 'number' },",
+                  "        title: { type: 'string' },",
+                  "        body: { type: 'string' }",
+                  "    },",
+                  "    additionalProperties: false",
+                  "};",
+                  "",
+                  "const postsSchema = {",
+                  "    type: 'array',",
+                  "    minItems: 1,",
+                  "    items: postSchema",
+                  "};",
+                  "",
+                  "pm.test('Response matches posts JSON schema', function () {",
+                  "    const posts = pm.response.json();",
+                  "    pm.expect(posts).to.have.jsonSchema(postsSchema);",
+                  "});",
+                  "",
+                  "const posts = pm.response.json();",
+                  "",
+                  "pm.test('Each post field has expected type', function () {",
+                  "    posts.forEach(function (post) {",
+                  "        pm.expect(post.userId).to.be.a('number');",
+                  "        pm.expect(post.id).to.be.a('number');",
+                  "        pm.expect(post.title).to.be.a('string');",
+                  "        pm.expect(post.body).to.be.a('string');",
+                  "    });",
+                  "});",
+                  "",
+                  "console.log('Schema validation status:', pm.response.code);",
+                  "console.log('Schema validation response time:', pm.response.responseTime);",
+                  "console.log('Validated posts count:', posts.length);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/posts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "posts"
+              ]
+            },
+            "description": "Validates posts response using JSON Schema and checks field types."
+          },
+          "response": []
         }
       ]
     },
