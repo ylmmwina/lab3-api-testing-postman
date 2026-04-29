@@ -1,0 +1,17 @@
+[
+  {
+    "title": "Postman data driven test title 1",
+    "body": "Postman data driven test body 1",
+    "userId": 1
+  },
+  {
+    "title": "Postman data driven test title 2",
+    "body": "Postman data driven test body 2",
+    "userId": 2
+  },
+  {
+    "title": "Postman data driven test title 3",
+    "body": "Postman data driven test body 3",
+    "userId": 3
+  }
+]
