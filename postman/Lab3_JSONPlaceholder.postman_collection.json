@@ -1,0 +1,99 @@
+{
+  "info": {
+    "_postman_id": "lab3-jsonplaceholder-collection",
+    "name": "Lab3 JSONPlaceholder API Tests",
+    "description": "Complex REST API testing for JSONPlaceholder using Postman and Newman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Functional tests",
+      "item": [
+        {
+          "name": "GET /posts - verify list of posts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
+                  "const expectedContentType = pm.environment.get('content_type');",
+                  "",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Content-Type is application/json; charset=utf-8', function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.eql(expectedContentType);",
+                  "});",
+                  "",
+                  "pm.test('Response time is less than max_response_time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);",
+                  "});",
+                  "",
+                  "const posts = pm.response.json();",
+                  "",
+                  "pm.test('Response body is an array', function () {",
+                  "    pm.expect(posts).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Response contains at least 100 posts', function () {",
+                  "    pm.expect(posts.length).to.be.at.least(100);",
+                  "});",
+                  "",
+                  "pm.test('Each post has required structure', function () {",
+                  "    posts.forEach(function (post) {",
+                  "        pm.expect(post).to.have.property('userId');",
+                  "        pm.expect(post).to.have.property('id');",
+                  "        pm.expect(post).to.have.property('title');",
+                  "        pm.expect(post).to.have.property('body');",
+                  "",
+                  "        pm.expect(post.userId).to.be.a('number');",
+                  "        pm.expect(post.id).to.be.a('number');",
+                  "        pm.expect(post.title).to.be.a('string');",
+                  "        pm.expect(post.body).to.be.a('string');",
+                  "    });",
+                  "});",
+                  "",
+                  "if (posts.length > 0) {",
+                  "    pm.environment.set('post_id', posts[0].id);",
+                  "    pm.environment.set('user_id', posts[0].userId);",
+                  "}",
+                  "",
+                  "console.log('Status:', pm.response.code);",
+                  "console.log('Response time:', pm.response.responseTime);",
+                  "console.log('First post ID:', posts[0] ? posts[0].id : null);",
+                  "console.log('First user ID:', posts[0] ? posts[0].userId : null);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/posts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "posts"
+              ]
+            },
+            "description": "Gets all posts and verifies status code, content type, response time, array type, minimum number of elements and object structure."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Negative tests",
+      "item": []
+    },
+    {
+      "name": "Workflow",
+      "item": []
+    }
+  ]
+}
