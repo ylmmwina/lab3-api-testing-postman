@@ -164,6 +164,25 @@
           "name": "POST /posts - data driven create post",
           "event": [
             {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const dataTitle = pm.iterationData.get('title') || 'Default data-driven title';",
+                  "const dataBody = pm.iterationData.get('body') || 'Default data-driven body';",
+                  "const dataUserId = pm.iterationData.get('userId') || 1;",
+                  "",
+                  "pm.environment.set('data_title', dataTitle);",
+                  "pm.environment.set('data_body', dataBody);",
+                  "pm.environment.set('data_user_id', dataUserId);",
+                  "",
+                  "console.log('Data-driven title:', dataTitle);",
+                  "console.log('Data-driven body:', dataBody);",
+                  "console.log('Data-driven userId:', dataUserId);"
+                ]
+              }
+            },
+            {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
@@ -185,15 +204,15 @@
                   "});",
                   "",
                   "pm.test('Created post title matches test data', function () {",
-                  "    pm.expect(responseJson.title).to.eql(pm.iterationData.get('title'));",
+                  "    pm.expect(responseJson.title).to.eql(pm.environment.get('data_title'));",
                   "});",
                   "",
                   "pm.test('Created post body matches test data', function () {",
-                  "    pm.expect(responseJson.body).to.eql(pm.iterationData.get('body'));",
+                  "    pm.expect(responseJson.body).to.eql(pm.environment.get('data_body'));",
                   "});",
                   "",
                   "pm.test('Created post userId matches test data', function () {",
-                  "    pm.expect(Number(responseJson.userId)).to.eql(Number(pm.iterationData.get('userId')));",
+                  "    pm.expect(Number(responseJson.userId)).to.eql(Number(pm.environment.get('data_user_id')));",
                   "});",
                   "",
                   "pm.environment.set('created_post_id', responseJson.id);",
@@ -218,7 +237,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"{{title}}\",\n  \"body\": \"{{body}}\",\n  \"userId\": {{userId}}\n}"
+              "raw": "{\n  \"title\": \"{{data_title}}\",\n  \"body\": \"{{data_body}}\",\n  \"userId\": {{data_user_id}}\n}"
             },
             "url": {
               "raw": "{{base_url}}/posts",
@@ -340,7 +359,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
-                  "let responseBody = {};",
+                  "var responseBody = {};",
                   "try { responseBody = pm.response.json(); } catch (e) { responseBody = {}; }",
                   "pm.test('Status code indicates non-existing resource behavior', function () {",
                   "    pm.expect([200, 404]).to.include(pm.response.code);",
@@ -444,7 +463,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
-                  "let responseBody = {};",
+                  "var responseBody = {};",
                   "try { responseBody = pm.response.json(); } catch (e) { responseBody = {}; }",
                   "pm.test('Status code indicates wrong ID behavior', function () {",
                   "    pm.expect([200, 404, 500]).to.include(pm.response.code);",
@@ -498,7 +517,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
-                  "let responseBody = {};",
+                  "var responseBody = {};",
                   "try { responseBody = pm.response.json(); } catch (e) { responseBody = {}; }",
                   "pm.test('Status code is 200 for fake DELETE operation', function () {",
                   "    pm.response.to.have.status(200);",
