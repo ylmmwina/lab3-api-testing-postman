@@ -334,7 +334,345 @@
     },
     {
       "name": "Workflow",
-      "item": []
+      "item": [
+        {
+          "name": "Workflow 01 - POST /posts create post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/posts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "posts"
+              ]
+            },
+            "description": "Creates a post and saves created_post_id. JSONPlaceholder returns an id but does not persist created resources.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Workflow created title\",\n  \"body\": \"Workflow created body\",\n  \"userId\": {{user_id}}\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
+                  "const responseJson = pm.response.json();",
+                  "",
+                  "pm.test('Workflow POST status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Workflow POST response time is less than max_response_time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);",
+                  "});",
+                  "",
+                  "pm.test('Workflow POST response contains id', function () {",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson.id).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test('Workflow POST response contains sent data', function () {",
+                  "    pm.expect(responseJson.title).to.eql('Workflow created title');",
+                  "    pm.expect(responseJson.body).to.eql('Workflow created body');",
+                  "    pm.expect(Number(responseJson.userId)).to.eql(Number(pm.environment.get('user_id')));",
+                  "});",
+                  "",
+                  "pm.environment.set('created_post_id', responseJson.id);",
+                  "pm.environment.set('workflow_title', responseJson.title);",
+                  "pm.environment.set('workflow_body', responseJson.body);",
+                  "",
+                  "console.log('Workflow POST status:', pm.response.code);",
+                  "console.log('Workflow POST response time:', pm.response.responseTime);",
+                  "console.log('Workflow created_post_id:', responseJson.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Workflow 02 - GET /posts/{{post_id}} read existing post",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/posts/{{post_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "posts",
+                "{{post_id}}"
+              ]
+            },
+            "description": "Reads an existing post using post_id. For JSONPlaceholder, created_post_id from POST is not used for GET because created resources are not persisted."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
+                  "const responseJson = pm.response.json();",
+                  "",
+                  "pm.test('Workflow GET existing post status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Workflow GET response time is less than max_response_time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);",
+                  "});",
+                  "",
+                  "pm.test('Workflow GET response has required fields', function () {",
+                  "    pm.expect(responseJson).to.have.property('userId');",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson).to.have.property('title');",
+                  "    pm.expect(responseJson).to.have.property('body');",
+                  "});",
+                  "",
+                  "pm.test('Workflow GET id matches post_id variable', function () {",
+                  "    pm.expect(Number(responseJson.id)).to.eql(Number(pm.environment.get('post_id')));",
+                  "});",
+                  "",
+                  "console.log('Workflow GET status:', pm.response.code);",
+                  "console.log('Workflow GET response time:', pm.response.responseTime);",
+                  "console.log('Workflow GET post id:', responseJson.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Workflow 03 - PUT /posts/{{post_id}} update post",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/posts/{{post_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "posts",
+                "{{post_id}}"
+              ]
+            },
+            "description": "Updates an existing post using PUT and verifies returned data.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{post_id}},\n  \"title\": \"Workflow updated title\",\n  \"body\": \"Workflow updated body\",\n  \"userId\": {{user_id}}\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
+                  "const responseJson = pm.response.json();",
+                  "",
+                  "pm.test('Workflow PUT status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Workflow PUT response time is less than max_response_time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);",
+                  "});",
+                  "",
+                  "pm.test('Workflow PUT response contains updated data', function () {",
+                  "    pm.expect(Number(responseJson.id)).to.eql(Number(pm.environment.get('post_id')));",
+                  "    pm.expect(responseJson.title).to.eql('Workflow updated title');",
+                  "    pm.expect(responseJson.body).to.eql('Workflow updated body');",
+                  "    pm.expect(Number(responseJson.userId)).to.eql(Number(pm.environment.get('user_id')));",
+                  "});",
+                  "",
+                  "pm.environment.set('workflow_updated_title', responseJson.title);",
+                  "pm.environment.set('workflow_updated_body', responseJson.body);",
+                  "",
+                  "console.log('Workflow PUT status:', pm.response.code);",
+                  "console.log('Workflow PUT response time:', pm.response.responseTime);",
+                  "console.log('Workflow updated title:', responseJson.title);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Workflow 04 - GET /posts/{{post_id}} after PUT",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/posts/{{post_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "posts",
+                "{{post_id}}"
+              ]
+            },
+            "description": "Checks GET after PUT. JSONPlaceholder does not persist changes, so this validates availability and structure instead of expecting updated title."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
+                  "const responseJson = pm.response.json();",
+                  "",
+                  "pm.test('Workflow GET after PUT status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Workflow GET after PUT response time is less than max_response_time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);",
+                  "});",
+                  "",
+                  "pm.test('Workflow GET after PUT returns valid existing post structure', function () {",
+                  "    pm.expect(responseJson).to.have.property('userId');",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson).to.have.property('title');",
+                  "    pm.expect(responseJson).to.have.property('body');",
+                  "});",
+                  "",
+                  "pm.test('Workflow note: JSONPlaceholder does not persist PUT changes', function () {",
+                  "    pm.expect(Number(responseJson.id)).to.eql(Number(pm.environment.get('post_id')));",
+                  "});",
+                  "",
+                  "console.log('Workflow GET after PUT status:', pm.response.code);",
+                  "console.log('Workflow GET after PUT response time:', pm.response.responseTime);",
+                  "console.log('Workflow GET after PUT title:', responseJson.title);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Workflow 05 - DELETE /posts/{{post_id}}",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/posts/{{post_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "posts",
+                "{{post_id}}"
+              ]
+            },
+            "description": "Deletes a post and saves deleted_post_id."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
+                  "",
+                  "pm.test('Workflow DELETE status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Workflow DELETE response time is less than max_response_time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);",
+                  "});",
+                  "",
+                  "pm.test('Workflow DELETE response body is empty object', function () {",
+                  "    pm.expect(pm.response.json()).to.deep.eql({});",
+                  "});",
+                  "",
+                  "pm.environment.set('deleted_post_id', pm.environment.get('post_id'));",
+                  "",
+                  "console.log('Workflow DELETE status:', pm.response.code);",
+                  "console.log('Workflow DELETE response time:', pm.response.responseTime);",
+                  "console.log('Workflow deleted post id:', pm.environment.get('post_id'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Workflow 06 - GET /posts/{{post_id}} after DELETE",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/posts/{{post_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "posts",
+                "{{post_id}}"
+              ]
+            },
+            "description": "Checks GET after DELETE. JSONPlaceholder does not persist deletes, so the existing post is still returned."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const maxResponseTime = Number(pm.environment.get('max_response_time'));",
+                  "const responseJson = pm.response.json();",
+                  "",
+                  "pm.test('Workflow GET after DELETE status code is 200 because JSONPlaceholder does not persist DELETE', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Workflow GET after DELETE response time is less than max_response_time', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);",
+                  "});",
+                  "",
+                  "pm.test('Workflow GET after DELETE still returns valid post structure', function () {",
+                  "    pm.expect(responseJson).to.have.property('userId');",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson).to.have.property('title');",
+                  "    pm.expect(responseJson).to.have.property('body');",
+                  "    pm.expect(Number(responseJson.id)).to.eql(Number(pm.environment.get('post_id')));",
+                  "});",
+                  "",
+                  "console.log('Workflow GET after DELETE status:', pm.response.code);",
+                  "console.log('Workflow GET after DELETE response time:', pm.response.responseTime);",
+                  "console.log('Workflow GET after DELETE id:', responseJson.id);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
